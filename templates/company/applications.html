@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h2 class="section-heading"><i class="bi bi-people-fill me-2"></i>Applications for <span>{{ drive.job_title }}</span></h2>
+        <p class="text-muted mb-0">Review and manage student applications</p>
+    </div>
+    <a href="{{ url_for('company.dashboard') }}" class="btn btn-outline-secondary"><i class="bi bi-arrow-left me-1"></i>Back to Dashboard</a>
+</div>
+
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <div>
+            <i class="bi bi-file-earmark-text me-2"></i>Applicants
+            {% if results %}
+                <span class="badge bg-primary ms-2">{{ results|length }} applicants viewable</span>
+            {% endif %}
+        </div>
+        
+        <div class="btn-group btn-group-sm filter-group">
+            <a href="{{ url_for('company.view_applications', drive_id=drive.id, status='all') }}" 
+               class="btn btn-outline-secondary {% if status_filter == 'all' %}active{% endif %}">
+                All <span class="badge bg-secondary ms-1">{{ app_counts.all }}</span>
+            </a>
+            <a href="{{ url_for('company.view_applications', drive_id=drive.id, status='Applied') }}" 
+               class="btn btn-outline-secondary {% if status_filter == 'Applied' %}active{% endif %}">
+                Applied <span class="badge bg-secondary ms-1">{{ app_counts.Applied }}</span>
+            </a>
+            <a href="{{ url_for('company.view_applications', drive_id=drive.id, status='Shortlisted') }}" 
+               class="btn btn-outline-info {% if status_filter == 'Shortlisted' %}active{% endif %}">
+                Shortlisted <span class="badge bg-info ms-1">{{ app_counts.Shortlisted }}</span>
+            </a>
+            <a href="{{ url_for('company.view_applications', drive_id=drive.id, status='Selected') }}" 
+               class="btn btn-outline-success {% if status_filter == 'Selected' %}active{% endif %}">
+                Selected <span class="badge bg-success ms-1">{{ app_counts.Selected }}</span>
+            </a>
+            <a href="{{ url_for('company.view_applications', drive_id=drive.id, status='Rejected') }}" 
+               class="btn btn-outline-danger {% if status_filter == 'Rejected' %}active{% endif %}">
+                Rejected <span class="badge bg-danger ms-1">{{ app_counts.Rejected }}</span>
+            </a>
+        </div>
+    </div>
+    <div class="card-body">
+        {% if results %}
+            <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Student Name</th>
+                        <th>Enrollment</th>
+                        <th>Branch</th>
+                        <th>CGPA</th>
+                        <th>Resume</th>
+                        <th>Applied On</th>
+                        <th>Status</th>
+                        <th>Update</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for app, student, user in results %}
+                    <tr>
+                        <td>
+                            <strong>{{ student.name }}</strong>
+                            <div class="small text-muted mt-1"><i class="bi bi-envelope me-1"></i>{{ user.email }}</div>
+                            {% if student.phone %}
+                                <div class="small text-muted"><i class="bi bi-telephone me-1"></i>{{ student.phone }}</div>
+                            {% endif %}
+                        </td>
+                        <td><code style="color: var(--accent-orange);">{{ student.enrollment_no }}</code></td>
+                        <td>{{ student.branch or '-' }}</td>
+                        <td>{{ student.cgpa or '-' }}</td>
+                        <td>
+                            {% if student.resume_path %}
+                                <a href="{{ student.resume_path }}" target="_blank" class="btn btn-sm btn-outline-info"><i class="bi bi-file-pdf me-1"></i>View</a>
+                            {% else %}
+                                <small class="text-muted">Not uploaded</small>
+                            {% endif %}
+                        </td>
+                        <td><small>{{ app.applied_at.strftime('%b %d, %Y') }}</small></td>
+                        <td>
+                            {% if app.status == 'Applied' %}
+                                <span class="badge bg-secondary">Applied</span>
+                            {% elif app.status == 'Shortlisted' %}
+                                <span class="badge bg-info">Shortlisted</span>
+                            {% elif app.status == 'Selected' %}
+                                <span class="badge bg-success">Selected</span>
+                            {% elif app.status == 'Rejected' %}
+                                <span class="badge bg-danger">Rejected</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="d-flex gap-1 flex-wrap btn-group-sm">
+                                <form action="{{ url_for('company.update_status', app_id=app.id, status='Shortlisted') }}" method="POST" style="display:inline;">
+                                    <button type="submit" class="btn btn-outline-info" title="Shortlist" {% if app.status == 'Shortlisted' %}disabled{% endif %} onclick="return confirm('Shortlist this student?')"><i class="bi bi-bookmark-check"></i></button>
+                                </form>
+                                <form action="{{ url_for('company.update_status', app_id=app.id, status='Selected') }}" method="POST" style="display:inline;">
+                                    <button type="submit" class="btn btn-outline-success" title="Select" {% if app.status == 'Selected' %}disabled{% endif %} onclick="return confirm('Mark this student as Selected?')"><i class="bi bi-check-circle"></i></button>
+                                </form>
+                                <form action="{{ url_for('company.update_status', app_id=app.id, status='Rejected') }}" method="POST" style="display:inline;">
+                                    <button type="submit" class="btn btn-outline-danger" title="Reject" {% if app.status == 'Rejected' %}disabled{% endif %} onclick="return confirm('Reject this student?')"><i class="bi bi-x-circle"></i></button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <i class="bi bi-inbox d-block"></i>
+                <p>No students have applied to this drive yet</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,236 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h2 class="section-heading"><i class="bi bi-search me-2"></i>Search <span>Users</span></h2>
+        <p class="text-muted mb-0">Find students and companies by name, ID, or contact info</p>
+    </div>
+    <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline-secondary"><i class="bi bi-arrow-left me-1"></i>Dashboard</a>
+</div>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="GET" action="{{ url_for('admin.search') }}">
+            <div class="input-group">
+                <span class="input-group-text" style="background: var(--bg-input); border: 1px solid var(--border-color); color: var(--text-muted);"><i class="bi bi-search"></i></span>
+                <input type="text" class="form-control" name="q" placeholder="Search by name, enrollment no, company name, email, phone..." value="{{ q }}">
+                <button type="submit" class="btn btn-primary"><i class="bi bi-search me-1"></i>Search</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% if q %}
+<div class="card mb-4">
+    <div class="card-header">
+        <i class="bi bi-people me-2"></i>Students
+        {% if students %}
+            <span class="badge bg-primary float-end">{{ students|length }} found</span>
+        {% endif %}
+    </div>
+    <div class="card-body">
+        {% if students %}
+            <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Enrollment</th>
+                        <th>Branch</th>
+                        <th>CGPA</th>
+                        <th>Email</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for student, user in students %}
+                    <tr>
+                        <td><strong>{{ student.name }}</strong></td>
+                        <td><code style="color: var(--accent-orange);">{{ student.enrollment_no }}</code></td>
+                        <td>{{ student.branch or '-' }}</td>
+                        <td>{{ student.cgpa or '-' }}</td>
+                        <td><small>{{ user.email }}</small></td>
+                        <td>
+                            {% if user.is_active %}
+                                <span class="badge bg-success">Active</span>
+                            {% else %}
+                                <span class="badge bg-danger">Blacklisted</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="d-flex gap-1">
+                                {% if user.is_active %}
+                                    <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#toggleModal{{ user.id }}" title="Blacklist"><i class="bi bi-slash-circle"></i></button>
+                                {% else %}
+                                    <button type="button" class="btn btn-sm btn-outline-success" data-bs-toggle="modal" data-bs-target="#toggleModal{{ user.id }}" title="Reactivate"><i class="bi bi-check-circle"></i></button>
+                                {% endif %}
+                                <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal{{ user.id }}" title="Delete"><i class="bi bi-trash"></i></button>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                
+                    <div class="modal fade" id="toggleModal{{ user.id }}" tabindex="-1">
+                      <div class="modal-dialog">
+                        <div class="modal-content">
+                          <div class="modal-header">
+                            <h5 class="modal-title">Confirm Action</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                          </div>
+                          <div class="modal-body">
+                            Are you sure you want to {% if user.is_active %}blacklist{% else %}reactivate{% endif %} <strong>{{ student.name }}</strong>?
+                          </div>
+                          <div class="modal-footer">
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <a href="{{ url_for('admin.toggle_active', user_id=user.id) }}" class="btn {% if user.is_active %}btn-danger{% else %}btn-success{% endif %}">
+                                {% if user.is_active %}Blacklist{% else %}Reactivate{% endif %}
+                            </a>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div class="modal fade" id="deleteModal{{ user.id }}" tabindex="-1">
+                      <div class="modal-dialog">
+                        <div class="modal-content">
+                          <div class="modal-header">
+                            <h5 class="modal-title" style="color: var(--accent-red);">⚠️ Delete User</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                          </div>
+                          <div class="modal-body">
+                            This will permanently delete <strong>{{ student.name }}</strong> and all their applications. This action cannot be undone!
+                          </div>
+                          <div class="modal-footer">
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <form action="{{ url_for('admin.delete_user', user_id=user.id) }}" method="POST" style="display:inline;">
+                                <button type="submit" class="btn btn-danger"><i class="bi bi-trash me-1"></i>Delete Permanently</button>
+                            </form>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    {% endfor %}
+                </tbody>
+            </table>
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <i class="bi bi-person-x d-block"></i>
+                <p>No students found matching "{{ q }}"</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header">
+        <i class="bi bi-building me-2"></i>Companies
+        {% if companies %}
+            <span class="badge bg-primary float-end">{{ companies|length }} found</span>
+        {% endif %}
+    </div>
+    <div class="card-body">
+        {% if companies %}
+            <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Company</th>
+                        <th>Industry</th>
+                        <th>HR Contact</th>
+                        <th>Email</th>
+                        <th>Approval</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for company, user in companies %}
+                    <tr>
+                        <td><strong>{{ company.company_name }}</strong></td>
+                        <td>{{ company.industry or '-' }}</td>
+                        <td><small>{{ company.hr_contact }}</small></td>
+                        <td><small>{{ user.email }}</small></td>
+                        <td>
+                            {% if company.approval_status == 'approved' %}
+                                <span class="badge bg-success">Approved</span>
+                            {% elif company.approval_status == 'rejected' %}
+                                <span class="badge bg-danger">Rejected</span>
+                            {% else %}
+                                <span class="badge bg-warning">Pending</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if user.is_active %}
+                                <span class="badge bg-success">Active</span>
+                            {% else %}
+                                <span class="badge bg-danger">Blacklisted</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="d-flex gap-1">
+                                {% if user.is_active %}
+                                    <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#toggleModal{{ user.id }}" title="Blacklist"><i class="bi bi-slash-circle"></i></button>
+                                {% else %}
+                                    <button type="button" class="btn btn-sm btn-outline-success" data-bs-toggle="modal" data-bs-target="#toggleModal{{ user.id }}" title="Reactivate"><i class="bi bi-check-circle"></i></button>
+                                {% endif %}
+                                <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal{{ user.id }}" title="Delete"><i class="bi bi-trash"></i></button>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <div class="modal fade" id="toggleModal{{ user.id }}" tabindex="-1">
+                      <div class="modal-dialog">
+                        <div class="modal-content">
+                          <div class="modal-header">
+                            <h5 class="modal-title">Confirm Action</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                          </div>
+                          <div class="modal-body">
+                            Are you sure you want to {% if user.is_active %}blacklist{% else %}reactivate{% endif %} <strong>{{ company.company_name }}</strong>?
+                          </div>
+                          <div class="modal-footer">
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <a href="{{ url_for('admin.toggle_active', user_id=user.id) }}" class="btn {% if user.is_active %}btn-danger{% else %}btn-success{% endif %}">
+                                {% if user.is_active %}Blacklist{% else %}Reactivate{% endif %}
+                            </a>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div class="modal fade" id="deleteModal{{ user.id }}" tabindex="-1">
+                      <div class="modal-dialog">
+                        <div class="modal-content">
+                          <div class="modal-header">
+                            <h5 class="modal-title" style="color: var(--accent-red);">⚠️ Delete Company</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                          </div>
+                          <div class="modal-body">
+                            This will permanently delete <strong>{{ company.company_name }}</strong>, all drives, and all applications. This cannot be undone!
+                          </div>
+                          <div class="modal-footer">
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <form action="{{ url_for('admin.delete_user', user_id=user.id) }}" method="POST" style="display:inline;">
+                                <button type="submit" class="btn btn-danger"><i class="bi bi-trash me-1"></i>Delete Permanently</button>
+                            </form>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    {% endfor %}
+                </tbody>
+            </table>
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <i class="bi bi-building-x d-block"></i>
+                <p>No companies found matching "{{ q }}"</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+{% endblock %}

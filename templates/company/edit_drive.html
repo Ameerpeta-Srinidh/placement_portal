@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h2 class="section-heading"><i class="bi bi-pencil-square me-2"></i>Edit <span>{{ drive.job_title }}</span></h2>
+        <p class="text-muted mb-0">Update drive details</p>
+    </div>
+    <a href="{{ url_for('company.dashboard') }}" class="btn btn-outline-secondary"><i class="bi bi-arrow-left me-1"></i>Back</a>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-body p-4">
+                <form method="POST" action="{{ url_for('company.edit_drive', drive_id=drive.id) }}">
+                    <div class="mb-3">
+                        <label class="form-label">Job Title</label>
+                        <input type="text" class="form-control" name="job_title" value="{{ drive.job_title }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Description</label>
+                        <textarea class="form-control" name="description" rows="4" required>{{ drive.description }}</textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Eligibility Criteria</label>
+                        <input type="text" class="form-control" name="eligibility" value="{{ drive.eligibility }}" required>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Salary / Package</label>
+                            <input type="text" class="form-control" name="salary_package" value="{{ drive.salary_package or '' }}" placeholder="e.g. 12 LPA">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Location</label>
+                            <input type="text" class="form-control" name="location" value="{{ drive.location or '' }}" placeholder="e.g. Bangalore">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Job Type</label>
+                            <select class="form-select" name="job_type">
+                                <option value="Full-Time" {% if drive.job_type == 'Full-Time' %}selected{% endif %}>Full-Time</option>
+                                <option value="Internship" {% if drive.job_type == 'Internship' %}selected{% endif %}>Internship</option>
+                                <option value="Part-Time" {% if drive.job_type == 'Part-Time' %}selected{% endif %}>Part-Time</option>
+                                <option value="Contract" {% if drive.job_type == 'Contract' %}selected{% endif %}>Contract</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Deadline</label>
+                            <input type="date" class="form-control" name="deadline" value="{{ drive.deadline.strftime('%Y-%m-%d') }}">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100 py-2"><i class="bi bi-check-lg me-2"></i>Update Drive</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,6 @@
+instance/
+__pycache__/
+*.py[cod]
+.env*
+!.env.example
+docx_output.txt

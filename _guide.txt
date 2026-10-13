@@ -1,0 +1,151 @@
+Placement Portal Application
+Complete Step-by-Step Implementation Guide
+Flask · Jinja2 · Bootstrap · SQLite
+
+
+0. Overview & Strategy
+This guide walks you through building the Placement Portal end-to-end — from project scaffolding to final submission. Follow each phase in order. Each phase ends with a checkpoint so you know what to verify before moving on.
+
+
+
+
+Phase 1 — Project Scaffold & Database
+1.1  Folder Structure
+Create the following layout. Every file listed here needs to exist before you write any logic.
+
+
+1.2  Install Dependencies
+Create a virtual environment and install all required packages:
+
+1.3  config.py
+
+1.4  Database Models (models.py)
+Use Flask-SQLAlchemy. All 5 core tables must be created programmatically — never via DB Browser.
+
+User table (unified auth)
+
+Student table
+
+Company table
+
+PlacementDrive table
+
+Application table
+
+1.5  app.py — App Factory
+
+1.6  seed.py — Seed the Admin
+
+
+
+
+Phase 2 — Authentication
+2.1  Routes (routes/auth.py)
+Three login flows share one login page. Role is determined from the User.role field. Registration is only for students and companies.
+
+
+2.2  Student Registration
+
+
+2.3  base.html — Master Template
+All pages extend base.html. It contains the Bootstrap navbar with role-based links via Jinja2.
+
+
+
+
+Phase 3 — Admin Flows
+3.1  Decorator for Role Protection
+Add this to a helpers.py file and use it on every admin route:
+
+3.2  Admin Dashboard
+
+3.3  Admin: Approve / Reject Company
+
+3.4  Admin: Search Students & Companies
+
+3.5  Admin: Blacklist / Deactivate
+
+
+
+
+Phase 4 — Company Flows
+4.1  Create a Placement Drive
+
+4.2  View & Update Applicants
+
+
+
+
+Phase 5 — Student Flows
+5.1  Student Dashboard
+
+5.2  Apply for a Drive (with duplicate guard)
+
+5.3  Resume Upload
+
+
+
+
+Phase 6 — REST API Endpoints (Optional / Bonus)
+Add these endpoints in routes/api.py for bonus marks. They return JSON and can coexist with the HTML routes.
+
+
+
+
+
+Phase 7 — UI Polish & Validation
+7.1  Backend Validation (do this before JS)
+Validation must happen server-side. This is the primary mechanism required by the project spec (JS is not to be used for core requirements).
+
+Email format check: use a simple regex or check for '@' and '.'
+CGPA must be between 0.0 and 10.0
+Password must be at least 8 characters
+Deadline must be a future date
+Resume must be a .pdf file under 2 MB (enforced by MAX_CONTENT_LENGTH)
+
+7.2  HTML5 Validation (complementary)
+Add HTML5 attributes directly in templates. These run client-side and improve UX without relying on JS logic for correctness.
+
+7.3  Bootstrap Components to Use
+Cards for drive listings (card-deck or row of col-md-4)
+Badges for status labels: badge bg-warning / bg-success / bg-danger
+Table table-striped table-hover for all tabular data
+Alert alert-dismissible for flash messages (already in base.html)
+Modal (Bootstrap) for confirm-before-delete prompts on admin pages
+
+7.4  ChartJS Statistics (optional bonus)
+In the admin dashboard template, add a canvas and populate it from Jinja2:
+
+
+
+Phase 8 — Submission Checklist
+8.1  Pre-submission Functional Checklist
+
+
+8.2  Project Report (≤ 5 pages)
+Include the following sections. Keep it concise — the examiner will read many reports.
+Student details (name, roll number, email)
+Project overview — one paragraph on your approach
+AI/LLM declaration — what you used Claude/ChatGPT for, extent of use
+Frameworks & libraries: Flask, Flask-Login, Flask-SQLAlchemy, Werkzeug, Bootstrap 5, ChartJS (if used)
+ER diagram — 5 entities: User, Student, Company, PlacementDrive, Application; draw all FK relationships
+API endpoints table (if implemented)
+Google Drive link to your presentation video
+
+8.3  ER Diagram Summary
+This is the complete set of relationships for your ER diagram:
+
+
+8.4  Zip File Structure
+
+
+
+Quick Reference — Common Patterns
+Flask-Login current_user in Templates
+
+Status Badge Colour Mapping
+
+404 / 403 Error Pages
+
+
+Good luck with your viva! Build it phase by phase and test each checkpoint before moving on.

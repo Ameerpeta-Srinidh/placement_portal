@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h2 class="section-heading"><i class="bi bi-clock-history me-2"></i>Placement <span>History</span></h2>
+        <p class="text-muted mb-0">Your complete application history</p>
+    </div>
+    <a href="{{ url_for('student.dashboard') }}" class="btn btn-outline-secondary"><i class="bi bi-arrow-left me-1"></i>Dashboard</a>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <i class="bi bi-journal-text me-2"></i>All Applications
+        {% if applications %}
+            <span class="badge bg-primary float-end">{{ applications|length }} total</span>
+        {% endif %}
+    </div>
+    <div class="card-body">
+        {% if applications %}
+            <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Job Title</th>
+                        <th>Company</th>
+                        <th>Package</th>
+                        <th>Location</th>
+                        <th>Applied On</th>
+                        <th>Drive Status</th>
+                        <th>Your Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for app, drive, company in applications %}
+                    <tr>
+                        <td>
+                            <strong>{{ drive.job_title }}</strong>
+                            <br><small class="text-muted">{{ drive.job_type or 'Full-Time' }}</small>
+                        </td>
+                        <td>{{ company.company_name }}</td>
+                        <td>{{ drive.salary_package or '-' }}</td>
+                        <td>{{ drive.location or '-' }}</td>
+                        <td><small>{{ app.applied_at.strftime('%b %d, %Y') }}</small></td>
+                        <td>
+                            {% if drive.status == 'approved' %}
+                                <span class="badge bg-success">Active</span>
+                            {% elif drive.status == 'closed' %}
+                                <span class="badge bg-secondary">Closed</span>
+                            {% else %}
+                                <span class="badge bg-warning">{{ drive.status|capitalize }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if app.status == 'Applied' %}
+                                <span class="badge bg-secondary">Applied</span>
+                            {% elif app.status == 'Shortlisted' %}
+                                <span class="badge bg-info">Shortlisted</span>
+                            {% elif app.status == 'Selected' %}
+                                <span class="badge bg-success">🎉 Selected</span>
+                            {% elif app.status == 'Rejected' %}
+                                <span class="badge bg-danger">Rejected</span>
+                            {% else %}
+                                <span class="badge bg-primary">{{ app.status }}</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <i class="bi bi-inbox d-block"></i>
+                <p>No application history yet. Start applying to placement drives!</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h2 class="section-heading"><i class="bi bi-building-gear me-2"></i>Edit <span>Company</span></h2>
+        <p class="text-muted mb-0">Editing profile for {{ company.company_name }} ({{ user.email }})</p>
+    </div>
+    <a href="{{ url_for('admin.all_companies') }}" class="btn btn-outline-secondary"><i class="bi bi-arrow-left me-1"></i>All Companies</a>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card profile-card">
+            <div class="card-body p-4">
+                <form method="POST" action="{{ url_for('admin.edit_company', company_id=company.id) }}">
+                    <div class="mb-3">
+                        <label class="form-label">Company Name</label>
+                        <input type="text" class="form-control" name="company_name" value="{{ company.company_name }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Email</label>
+                        <input type="email" class="form-control" value="{{ user.email }}" disabled>
+                        <small class="text-muted">Email cannot be changed from here</small>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">HR Contact</label>
+                            <input type="text" class="form-control" name="hr_contact" value="{{ company.hr_contact }}" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Industry</label>
+                            <input type="text" class="form-control" name="industry" value="{{ company.industry or '' }}" placeholder="e.g. Technology, Finance">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Website</label>
+                        <input type="url" class="form-control" name="website" value="{{ company.website or '' }}" placeholder="https://www.company.com">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">About the Company</label>
+                        <textarea class="form-control" name="description" rows="3" placeholder="Short description of the company">{{ company.description or '' }}</textarea>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label">Approval Status</label>
+                        <select class="form-select" name="approval_status">
+                            <option value="pending" {% if company.approval_status == 'pending' %}selected{% endif %}>Pending</option>
+                            <option value="approved" {% if company.approval_status == 'approved' %}selected{% endif %}>Approved</option>
+                            <option value="rejected" {% if company.approval_status == 'rejected' %}selected{% endif %}>Rejected</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100 py-2"><i class="bi bi-check-lg me-2"></i>Save Changes</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

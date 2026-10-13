@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h2 class="section-heading"><i class="bi bi-briefcase-fill me-2"></i>Drive <span>Details</span></h2>
+        <p class="text-muted mb-0">Full details for this placement drive</p>
+    </div>
+    <a href="{{ url_for('student.dashboard') }}" class="btn btn-outline-secondary"><i class="bi bi-arrow-left me-1"></i>Dashboard</a>
+</div>
+
+<div class="row g-4">
+    <!-- Drive Info -->
+    <div class="col-lg-8">
+        <div class="card profile-card">
+            <div class="card-header">
+                <i class="bi bi-info-circle me-2"></i>{{ drive.job_title }}
+                {% if drive.status == 'approved' %}
+                    <span class="badge bg-success float-end">Active</span>
+                {% elif drive.status == 'closed' %}
+                    <span class="badge bg-secondary float-end">Closed</span>
+                {% else %}
+                    <span class="badge bg-warning float-end">{{ drive.status|capitalize }}</span>
+                {% endif %}
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-sm-6 mb-3">
+                        <small class="text-muted text-uppercase" style="letter-spacing:0.5px;">Job Type</small>
+                        <p class="mb-0"><span class="badge bg-info">{{ drive.job_type or 'Full-Time' }}</span></p>
+                    </div>
+                    <div class="col-sm-6 mb-3">
+                        <small class="text-muted text-uppercase" style="letter-spacing:0.5px;">Salary / Package</small>
+                        <p class="mb-0" style="color: var(--accent-green); font-weight: 600;">{{ drive.salary_package or 'Not specified' }}</p>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-sm-6 mb-3">
+                        <small class="text-muted text-uppercase" style="letter-spacing:0.5px;">Location</small>
+                        <p class="mb-0"><i class="bi bi-geo-alt me-1"></i>{{ drive.location or 'Not specified' }}</p>
+                    </div>
+                    <div class="col-sm-6 mb-3">
+                        <small class="text-muted text-uppercase" style="letter-spacing:0.5px;">Application Deadline</small>
+                        <p class="mb-0 {% if deadline_passed %}text-danger{% else %}text-success{% endif %}">
+                            <i class="bi bi-calendar-event me-1"></i>{{ drive.deadline.strftime('%B %d, %Y') }}
+                            {% if deadline_passed %}<small>(Expired)</small>{% endif %}
+                        </p>
+                    </div>
+                </div>
+                
+                <hr>
+                
+                <div class="mb-4">
+                    <h6 style="color: var(--accent-orange); font-weight: 600;"><i class="bi bi-card-text me-1"></i> Job Description</h6>
+                    <p style="line-height: 1.8; white-space: pre-wrap;">{{ drive.description }}</p>
+                </div>
+                
+                <div class="mb-4">
+                    <h6 style="color: var(--accent-blue); font-weight: 600;"><i class="bi bi-check2-square me-1"></i> Eligibility Criteria</h6>
+                    <p style="line-height: 1.8; white-space: pre-wrap;">{{ drive.eligibility }}</p>
+                </div>
+
+                <hr>
+
+                <div class="d-flex justify-content-between align-items-center">
+                    <small class="text-muted">Posted on {{ drive.created_at.strftime('%B %d, %Y') }}</small>
+                    {% if has_applied %}
+                        <button class="btn btn-success" disabled><i class="bi bi-check-lg me-1"></i>Already Applied</button>
+                    {% elif deadline_passed %}
+                        <button class="btn btn-secondary" disabled><i class="bi bi-calendar-x me-1"></i>Deadline Passed</button>
+                    {% elif drive.status != 'approved' %}
+                        <button class="btn btn-secondary" disabled><i class="bi bi-pause-circle me-1"></i>Drive Not Active</button>
+                    {% else %}
+                        <form action="{{ url_for('student.apply', drive_id=drive.id) }}" method="POST">
+                            <button type="submit" class="btn btn-primary"><i class="bi bi-send me-1"></i>Apply Now</button>
+                        </form>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Company Info Sidebar -->
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header"><i class="bi bi-building me-2"></i>Company Info</div>
+            <div class="card-body">
+                <h5 class="card-title mb-3">{{ company.company_name }}</h5>
+                {% if company.industry %}
+                <div class="mb-2">
+                    <small class="text-muted text-uppercase" style="letter-spacing:0.5px;">Industry</small>
+                    <p class="mb-1">{{ company.industry }}</p>
+                </div>
+                {% endif %}
+                {% if company.hr_contact %}
+                <div class="mb-2">
+                    <small class="text-muted text-uppercase" style="letter-spacing:0.5px;">HR Contact</small>
+                    <p class="mb-1">{{ company.hr_contact }}</p>
+                </div>
+                {% endif %}
+                {% if company.website %}
+                <div class="mb-2">
+                    <small class="text-muted text-uppercase" style="letter-spacing:0.5px;">Website</small>
+                    <p class="mb-1"><a href="{{ company.website }}" target="_blank">{{ company.website }}</a></p>
+                </div>
+                {% endif %}
+                {% if company.description %}
+                <div class="mb-2">
+                    <small class="text-muted text-uppercase" style="letter-spacing:0.5px;">About</small>
+                    <p class="mb-1" style="font-size: 0.9rem;">{{ company.description }}</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

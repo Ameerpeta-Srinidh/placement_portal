@@ -1,0 +1,189 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h2 class="section-heading"><i class="bi bi-mortarboard me-2"></i>Student <span>Dashboard</span></h2>
+        <p class="text-muted mb-0">View drives, apply and track your applications</p>
+    </div>
+    <span class="welcome-badge"><i class="bi bi-person-circle me-1"></i>{{ student.name }}</span>
+</div>
+
+<div class="row g-3">
+    <!-- Student Profile -->
+    <div class="col-lg-4 mb-4">
+        <div class="card profile-card h-100">
+            <div class="card-header"><i class="bi bi-person me-2"></i>Your Profile</div>
+            <div class="card-body">
+                <h5 class="card-title mb-3">{{ student.name }}</h5>
+                <div class="mb-2">
+                    <small class="text-muted text-uppercase" style="letter-spacing:0.5px;">Enrollment No</small>
+                    <p class="mb-1"><code style="color: var(--accent-orange);">{{ student.enrollment_no }}</code></p>
+                </div>
+                {% if student.branch %}
+                <div class="mb-2">
+                    <small class="text-muted text-uppercase" style="letter-spacing:0.5px;">Branch</small>
+                    <p class="mb-1">{{ student.branch }}</p>
+                </div>
+                {% endif %}
+                {% if student.cgpa %}
+                <div class="mb-2">
+                    <small class="text-muted text-uppercase" style="letter-spacing:0.5px;">CGPA</small>
+                    <p class="mb-1"><strong style="color: var(--accent-green);">{{ student.cgpa }}</strong> / 10</p>
+                </div>
+                {% endif %}
+                {% if student.phone %}
+                <div class="mb-2">
+                    <small class="text-muted text-uppercase" style="letter-spacing:0.5px;">Phone</small>
+                    <p class="mb-1">{{ student.phone }}</p>
+                </div>
+                {% endif %}
+                <div class="mb-3">
+                    <small class="text-muted text-uppercase" style="letter-spacing:0.5px;">Resume</small>
+                    <p class="mb-1">
+                        {% if student.resume_path %}
+                            <a href="{{ student.resume_path }}" target="_blank"><i class="bi bi-file-pdf me-1"></i>View Resume</a>
+                        {% else %}
+                            <span class="text-muted">Not uploaded yet</span>
+                        {% endif %}
+                    </p>
+                </div>
+                <hr>
+                <a href="{{ url_for('student.edit_profile') }}" class="btn btn-outline-primary btn-sm w-100 mb-2"><i class="bi bi-pencil me-1"></i>Edit Profile</a>
+                <a href="{{ url_for('student.history') }}" class="btn btn-outline-secondary btn-sm w-100 mb-3"><i class="bi bi-clock-history me-1"></i>Placement History</a>
+                
+                <!-- Resume Upload -->
+                <form action="{{ url_for('student.upload_resume') }}" method="POST" enctype="multipart/form-data">
+                    <div class="mb-2">
+                        <label class="form-label" style="font-size: 0.8rem;">Upload Resume (PDF, max 2MB)</label>
+                        <input type="file" class="form-control form-control-sm" name="resume" accept=".pdf" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-sm w-100"><i class="bi bi-upload me-1"></i>Upload</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Applications Panel -->
+    <div class="col-lg-8 mb-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <i class="bi bi-send-check me-2"></i>Your Applications
+                {% if my_applications %}
+                    <span class="badge bg-primary float-end">{{ my_applications|length }}</span>
+                {% endif %}
+            </div>
+            <div class="card-body">
+                {% if my_applications %}
+                    <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Job Title</th>
+                                <th>Company</th>
+                                <th>Applied</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for app in my_applications %}
+                            <tr>
+                                <td><strong>{{ app.drive.job_title }}</strong></td>
+                                <td>{{ app.drive.company.company_name }}</td>
+                                <td><small>{{ app.applied_at.strftime('%b %d, %Y') }}</small></td>
+                                <td>
+                                    {% if app.status == 'Applied' %}
+                                        <span class="badge bg-secondary">Applied</span>
+                                    {% elif app.status == 'Shortlisted' %}
+                                        <span class="badge bg-info">Shortlisted</span>
+                                    {% elif app.status == 'Selected' %}
+                                        <span class="badge bg-success">🎉 Selected</span>
+                                    {% elif app.status == 'Rejected' %}
+                                        <span class="badge bg-danger">Rejected</span>
+                                    {% else %}
+                                        <span class="badge bg-primary">{{ app.status }}</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    </div>
+                {% else %}
+                    <div class="empty-state">
+                        <i class="bi bi-inbox d-block"></i>
+                        <p>You haven't applied to any drives yet. Check available drives below!</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Available Placement Drives -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header" style="color: var(--accent-orange);">
+                <i class="bi bi-briefcase-fill me-2"></i>Available Placement Drives
+                {% if available_drives %}
+                    <span class="badge bg-primary float-end">{{ available_drives|length }} open</span>
+                {% endif %}
+            </div>
+            <div class="card-body">
+                {% if available_drives %}
+                    <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Job Title</th>
+                                <th>Company</th>
+                                <th>Package</th>
+                                <th>Location</th>
+                                <th>Eligibility</th>
+                                <th>Deadline</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for drive in available_drives %}
+                            <tr>
+                                <td>
+                                    <a href="{{ url_for('student.drive_detail', drive_id=drive.id) }}" style="color: var(--text-primary); text-decoration: none;">
+                                        <strong>{{ drive.job_title }}</strong>
+                                    </a>
+                                    <br><small class="text-muted">{{ drive.job_type or 'Full-Time' }}</small>
+                                </td>
+                                <td>{{ drive.company.company_name }}</td>
+                                <td>{{ drive.salary_package or '-' }}</td>
+                                <td>{{ drive.location or '-' }}</td>
+                                <td><small>{{ drive.eligibility }}</small></td>
+                                <td><small>{{ drive.deadline.strftime('%b %d, %Y') }}</small></td>
+                                <td>
+                                    <div class="d-flex gap-1">
+                                        <a href="{{ url_for('student.drive_detail', drive_id=drive.id) }}" class="btn btn-sm btn-outline-info" title="View Details"><i class="bi bi-eye"></i></a>
+                                        {% if drive.id in applied_drive_ids %}
+                                            <button class="btn btn-sm btn-success" disabled><i class="bi bi-check-lg me-1"></i>Applied</button>
+                                        {% else %}
+                                            <form action="{{ url_for('student.apply', drive_id=drive.id) }}" method="POST">
+                                                <button type="submit" class="btn btn-sm btn-primary"><i class="bi bi-send me-1"></i>Apply</button>
+                                            </form>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    </div>
+                {% else %}
+                    <div class="empty-state">
+                        <i class="bi bi-briefcase d-block"></i>
+                        <p>No active placement drives at the moment. Check back later!</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

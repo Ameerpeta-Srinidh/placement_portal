@@ -1,0 +1,215 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h2 class="section-heading"><i class="bi bi-building me-2"></i>Company <span>Dashboard</span></h2>
+        <p class="text-muted mb-0">Manage your placement drives and track applications</p>
+    </div>
+    <span class="welcome-badge"><i class="bi bi-person-circle me-1"></i>{{ company.company_name }}</span>
+</div>
+<div class="row mb-4 g-3">
+    <div class="col-md-2 col-sm-4 col-6">
+        <div class="card stat-card border-0 shadow-sm text-center p-3 h-100">
+            <h3 class="mb-1" style="color: var(--accent-orange);">{{ stats.total_drives }}</h3>
+            <small class="text-muted text-uppercase fw-bold" style="font-size: 0.75rem;">Total Drives</small>
+        </div>
+    </div>
+    <div class="col-md-2 col-sm-4 col-6">
+        <div class="card stat-card border-0 shadow-sm text-center p-3 h-100">
+            <h3 class="mb-1" style="color: var(--accent-blue);">{{ stats.active_drives }}</h3>
+            <small class="text-muted text-uppercase fw-bold" style="font-size: 0.75rem;">Active Drives</small>
+        </div>
+    </div>
+    <div class="col-md-2 col-sm-4 col-6">
+        <div class="card stat-card border-0 shadow-sm text-center p-3 h-100">
+            <h3 class="mb-1 text-primary">{{ stats.total_applicants }}</h3>
+            <small class="text-muted text-uppercase fw-bold" style="font-size: 0.75rem;">Total Applicants</small>
+        </div>
+    </div>
+    <div class="col-md-2 col-sm-4 col-6">
+        <div class="card stat-card border-0 shadow-sm text-center p-3 h-100">
+            <h3 class="mb-1 text-info">{{ stats.shortlisted }}</h3>
+            <small class="text-muted text-uppercase fw-bold" style="font-size: 0.75rem;">Shortlisted</small>
+        </div>
+    </div>
+    <div class="col-md-2 col-sm-4 col-6">
+        <div class="card stat-card border-0 shadow-sm text-center p-3 h-100">
+            <h3 class="mb-1 text-success">{{ stats.selected }}</h3>
+            <small class="text-muted text-uppercase fw-bold" style="font-size: 0.75rem;">Selected</small>
+        </div>
+    </div>
+    <div class="col-md-2 col-sm-4 col-6">
+        <div class="card stat-card border-0 shadow-sm text-center p-3 h-100">
+            <h3 class="mb-1 text-warning">{{ stats.pending_drives }}</h3>
+            <small class="text-muted text-uppercase fw-bold" style="font-size: 0.75rem;">Pending Drives</small>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    <!-- Company Profile Panel -->
+    <div class="col-lg-4">
+        <div class="card profile-card mb-3">
+            <div class="card-header"><i class="bi bi-building me-2"></i>Company Profile</div>
+            <div class="card-body">
+                <h5 class="card-title mb-3">{{ company.company_name }}</h5>
+                <div class="mb-2">
+                    <small class="text-muted text-uppercase" style="letter-spacing: 0.5px;">HR Contact</small>
+                    <p class="mb-1">{{ company.hr_contact }}</p>
+                </div>
+                {% if company.industry %}
+                <div class="mb-2">
+                    <small class="text-muted text-uppercase" style="letter-spacing: 0.5px;">Industry</small>
+                    <p class="mb-1">{{ company.industry }}</p>
+                </div>
+                {% endif %}
+                <div class="mb-2">
+                    <small class="text-muted text-uppercase" style="letter-spacing: 0.5px;">Website</small>
+                    <p class="mb-1"><a href="{{ company.website }}" target="_blank">{{ company.website or 'Not provided' }}</a></p>
+                </div>
+                <div class="mb-3">
+                    <small class="text-muted text-uppercase" style="letter-spacing: 0.5px;">Approval Status</small>
+                    <p class="mb-0">
+                        {% if company.approval_status == 'approved' %}
+                            <span class="badge bg-success">Approved</span>
+                        {% elif company.approval_status == 'rejected' %}
+                            <span class="badge bg-danger">Rejected</span>
+                        {% else %}
+                            <span class="badge bg-warning">Pending Approval</span>
+                        {% endif %}
+                    </p>
+                </div>
+                <a href="{{ url_for('company.edit_profile') }}" class="btn btn-outline-primary btn-sm w-100"><i class="bi bi-pencil me-1"></i>Edit Profile</a>
+            </div>
+        </div>
+
+        {% if company.approval_status == 'approved' %}
+        <div class="card">
+            <div class="card-header" style="color: var(--accent-orange);"><i class="bi bi-plus-circle me-2"></i>Post New Drive</div>
+            <div class="card-body">
+                <form action="{{ url_for('company.create_drive') }}" method="POST">
+                    <div class="mb-3">
+                        <label class="form-label">Job Title</label>
+                        <input type="text" class="form-control" name="job_title" placeholder="e.g. Software Engineer" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Description</label>
+                        <textarea class="form-control" name="description" rows="3" placeholder="Job role description..." required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Eligibility Criteria</label>
+                        <input type="text" class="form-control" name="eligibility" placeholder="e.g. B.Tech CS > 7.5 CGPA" required>
+                    </div>
+                    <div class="row">
+                        <div class="col-6 mb-3">
+                            <label class="form-label">Salary / Package</label>
+                            <input type="text" class="form-control" name="salary_package" placeholder="e.g. 12 LPA">
+                        </div>
+                        <div class="col-6 mb-3">
+                            <label class="form-label">Location</label>
+                            <input type="text" class="form-control" name="location" placeholder="e.g. Bangalore">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-6 mb-3">
+                            <label class="form-label">Job Type</label>
+                            <select class="form-select" name="job_type">
+                                <option value="Full-Time">Full-Time</option>
+                                <option value="Internship">Internship</option>
+                                <option value="Part-Time">Part-Time</option>
+                                <option value="Contract">Contract</option>
+                            </select>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <label class="form-label">Deadline</label>
+                            <input type="date" class="form-control" name="deadline" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100"><i class="bi bi-send me-2"></i>Submit for Approval</button>
+                </form>
+            </div>
+        </div>
+        {% else %}
+        <div class="alert alert-warning">
+            <i class="bi bi-hourglass-split me-2"></i>Your account must be approved by the Admin before you can post placement drives.
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Placement Drives Panel -->
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-briefcase me-2"></i>Your Placement Drives
+                {% if drives %}
+                    <span class="badge bg-primary float-end">{{ drives|length }}</span>
+                {% endif %}
+            </div>
+            <div class="card-body">
+                {% if drives %}
+                    <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Role</th>
+                                <th>Package</th>
+                                <th>Deadline</th>
+                                <th>Status</th>
+                                <th>Applicants</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for d in drives %}
+                            <tr>
+                                <td>
+                                    <strong>{{ d.job_title }}</strong>
+                                    <br><small class="text-muted">{{ d.job_type or 'Full-Time' }}</small>
+                                </td>
+                                <td>{{ d.salary_package or '-' }}</td>
+                                <td><small>{{ d.deadline.strftime('%b %d, %Y') }}</small></td>
+                                <td>
+                                    {% if d.status == 'approved' %}
+                                        <span class="badge bg-success">Approved</span>
+                                    {% elif d.status == 'rejected' %}
+                                        <span class="badge bg-danger">Rejected</span>
+                                    {% elif d.status == 'closed' %}
+                                        <span class="badge bg-secondary">Closed</span>
+                                    {% else %}
+                                        <span class="badge bg-warning">Pending</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <span class="badge bg-info">{{ drive_applicant_counts.get(d.id, 0) }}</span>
+                                </td>
+                                <td>
+                                    <div class="d-flex gap-1 flex-wrap">
+                                        <a href="{{ url_for('company.view_applications', drive_id=d.id) }}" class="btn btn-sm btn-outline-info" title="View Applications"><i class="bi bi-people"></i></a>
+                                        <a href="{{ url_for('company.edit_drive', drive_id=d.id) }}" class="btn btn-sm btn-outline-primary" title="Edit"><i class="bi bi-pencil"></i></a>
+                                        {% if d.status == 'approved' %}
+                                            <form action="{{ url_for('company.close_drive', drive_id=d.id) }}" method="POST" style="display:inline;">
+                                                <button type="submit" class="btn btn-sm btn-outline-secondary" title="Close Drive" onclick="return confirm('Are you sure you want to close this drive? Students will no longer be able to apply.')"><i class="bi bi-x-circle"></i></button>
+                                            </form>
+                                        {% endif %}
+                                        <form action="{{ url_for('company.delete_drive', drive_id=d.id) }}" method="POST" style="display:inline;">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete" onclick="return confirm('Delete this drive?')"><i class="bi bi-trash"></i></button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    </div>
+                {% else %}
+                    <div class="empty-state">
+                        <i class="bi bi-briefcase d-block"></i>
+                        <p>You haven't created any placement drives yet</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

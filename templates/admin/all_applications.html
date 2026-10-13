@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h2 class="section-heading"><i class="bi bi-file-earmark-text me-2"></i>All <span>Applications</span></h2>
+        <p class="text-muted mb-0">View all student applications across all placement drives</p>
+    </div>
+    <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline-secondary"><i class="bi bi-arrow-left me-1"></i>Dashboard</a>
+</div>
+
+<div class="filter-pills mb-4">
+    <a href="{{ url_for('admin.all_applications', status='all') }}" class="filter-pill {% if status_filter == 'all' %}active{% endif %}">All</a>
+    <a href="{{ url_for('admin.all_applications', status='Applied') }}" class="filter-pill {% if status_filter == 'Applied' %}active{% endif %}">Applied</a>
+    <a href="{{ url_for('admin.all_applications', status='Shortlisted') }}" class="filter-pill {% if status_filter == 'Shortlisted' %}active{% endif %}">Shortlisted</a>
+    <a href="{{ url_for('admin.all_applications', status='Selected') }}" class="filter-pill {% if status_filter == 'Selected' %}active{% endif %}">Selected</a>
+    <a href="{{ url_for('admin.all_applications', status='Rejected') }}" class="filter-pill {% if status_filter == 'Rejected' %}active{% endif %}">Rejected</a>
+</div>
+
+<div class="card">
+    <div class="card-header"><i class="bi bi-list-ul me-2"></i>Applications ({{ results|length }})</div>
+    <div class="card-body">
+        {% if results %}
+            <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>App ID</th>
+                        <th>Student</th>
+                        <th>Enrollment</th>
+                        <th>Job Title</th>
+                        <th>Company</th>
+                        <th>Applied On</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for app, student, drive, company in results %}
+                    <tr>
+                        <td><code style="color: var(--accent-orange);">#{{ app.id }}</code></td>
+                        <td><strong>{{ student.name }}</strong></td>
+                        <td><small>{{ student.enrollment_no }}</small></td>
+                        <td>{{ drive.job_title }}</td>
+                        <td>{{ company.company_name }}</td>
+                        <td><small>{{ app.applied_at.strftime('%b %d, %Y') }}</small></td>
+                        <td>
+                            {% if app.status == 'Applied' %}
+                                <span class="badge bg-secondary">Applied</span>
+                            {% elif app.status == 'Shortlisted' %}
+                                <span class="badge bg-info">Shortlisted</span>
+                            {% elif app.status == 'Selected' %}
+                                <span class="badge bg-success">Selected</span>
+                            {% elif app.status == 'Rejected' %}
+                                <span class="badge bg-danger">Rejected</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <i class="bi bi-inbox d-block"></i>
+                <p>No applications found</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

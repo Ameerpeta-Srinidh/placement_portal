@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h2 class="section-heading"><i class="bi bi-person-gear me-2"></i>Edit <span>Profile</span></h2>
+        <p class="text-muted mb-0">Update your personal information</p>
+    </div>
+    <a href="{{ url_for('student.dashboard') }}" class="btn btn-outline-secondary"><i class="bi bi-arrow-left me-1"></i>Back</a>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-lg-7">
+        <div class="card profile-card">
+            <div class="card-body p-4">
+                <form method="POST" action="{{ url_for('student.edit_profile') }}">
+                    <div class="mb-3">
+                        <label class="form-label">Full Name</label>
+                        <input type="text" class="form-control" name="name" value="{{ student.name }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Enrollment No.</label>
+                        <input type="text" class="form-control" value="{{ student.enrollment_no }}" disabled>
+                        <small class="text-muted">Enrollment number cannot be changed</small>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Branch / Department</label>
+                            <input type="text" class="form-control" name="branch" value="{{ student.branch or '' }}" placeholder="e.g. Computer Science">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">CGPA</label>
+                            <input type="number" class="form-control" name="cgpa" value="{{ student.cgpa or '' }}" step="0.01" min="0" max="10" placeholder="e.g. 8.5">
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label">Phone Number</label>
+                        <input type="tel" class="form-control" name="phone" value="{{ student.phone or '' }}" placeholder="e.g. 9876543210">
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100 py-2"><i class="bi bi-check-lg me-2"></i>Save Changes</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

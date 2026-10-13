@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h2 class="section-heading"><i class="bi bi-briefcase-fill me-2"></i>All <span>Placement Drives</span></h2>
+        <p class="text-muted mb-0">View and manage all placement drives across the platform</p>
+    </div>
+    <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline-secondary"><i class="bi bi-arrow-left me-1"></i>Dashboard</a>
+</div>
+
+<div class="filter-pills mb-4">
+    <a href="{{ url_for('admin.all_drives', status='all') }}" class="filter-pill {% if status_filter == 'all' %}active{% endif %}">All</a>
+    <a href="{{ url_for('admin.all_drives', status='pending') }}" class="filter-pill {% if status_filter == 'pending' %}active{% endif %}">Pending</a>
+    <a href="{{ url_for('admin.all_drives', status='approved') }}" class="filter-pill {% if status_filter == 'approved' %}active{% endif %}">Approved</a>
+    <a href="{{ url_for('admin.all_drives', status='rejected') }}" class="filter-pill {% if status_filter == 'rejected' %}active{% endif %}">Rejected</a>
+    <a href="{{ url_for('admin.all_drives', status='closed') }}" class="filter-pill {% if status_filter == 'closed' %}active{% endif %}">Closed</a>
+</div>
+
+<div class="card">
+    <div class="card-header"><i class="bi bi-list-ul me-2"></i>Drives ({{ drives|length }})</div>
+    <div class="card-body">
+        {% if drives %}
+            <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Job Title</th>
+                        <th>Company</th>
+                        <th>Package</th>
+                        <th>Location</th>
+                        <th>Deadline</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for drive, company in drives %}
+                    <tr>
+                        <td><code style="color: var(--accent-orange);">#{{ drive.id }}</code></td>
+                        <td>
+                            <strong>{{ drive.job_title }}</strong>
+                            <br><small class="text-muted">{{ drive.eligibility }}</small>
+                        </td>
+                        <td>{{ company.company_name }}</td>
+                        <td>{{ drive.salary_package or '-' }}</td>
+                        <td>{{ drive.location or '-' }}</td>
+                        <td><small>{{ drive.deadline.strftime('%b %d, %Y') }}</small></td>
+                        <td>
+                            {% if drive.status == 'approved' %}
+                                <span class="badge bg-success">Approved</span>
+                            {% elif drive.status == 'rejected' %}
+                                <span class="badge bg-danger">Rejected</span>
+                            {% elif drive.status == 'closed' %}
+                                <span class="badge bg-secondary">Closed</span>
+                            {% else %}
+                                <span class="badge bg-warning">Pending</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if drive.status == 'pending' %}
+                                <a href="{{ url_for('admin.approve_drive', drive_id=drive.id, action='approve') }}" class="btn btn-sm btn-success" title="Approve"><i class="bi bi-check-lg"></i></a>
+                                <a href="{{ url_for('admin.approve_drive', drive_id=drive.id, action='reject') }}" class="btn btn-sm btn-danger" title="Reject"><i class="bi bi-x-lg"></i></a>
+                            {% else %}
+                                <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <i class="bi bi-briefcase d-block"></i>
+                <p>No drives found with the selected filter</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

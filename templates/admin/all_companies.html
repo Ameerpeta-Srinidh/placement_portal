@@ -1,0 +1,145 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h2 class="section-heading"><i class="bi bi-building me-2"></i>All <span>Companies</span></h2>
+        <p class="text-muted mb-0">View and manage all registered companies</p>
+    </div>
+    <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline-secondary"><i class="bi bi-arrow-left me-1"></i>Dashboard</a>
+</div>
+
+<!-- Filter Pills -->
+<div class="filter-pills mb-4">
+    <a href="{{ url_for('admin.all_companies', status='all') }}" class="filter-pill {% if status_filter == 'all' %}active{% endif %}">All</a>
+    <a href="{{ url_for('admin.all_companies', status='pending') }}" class="filter-pill {% if status_filter == 'pending' %}active{% endif %}">Pending</a>
+    <a href="{{ url_for('admin.all_companies', status='approved') }}" class="filter-pill {% if status_filter == 'approved' %}active{% endif %}">Approved</a>
+    <a href="{{ url_for('admin.all_companies', status='rejected') }}" class="filter-pill {% if status_filter == 'rejected' %}active{% endif %}">Rejected</a>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <i class="bi bi-list-ul me-2"></i>Companies
+        {% if companies %}
+            <span class="badge bg-primary float-end">{{ companies|length }} total</span>
+        {% endif %}
+    </div>
+    <div class="card-body">
+        {% if companies %}
+            <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Company</th>
+                        <th>Industry</th>
+                        <th>HR Contact</th>
+                        <th>Website</th>
+                        <th>Email</th>
+                        <th>Approval</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for company, user in companies %}
+                    <tr>
+                        <td><code style="color: var(--accent-orange);">#{{ company.id }}</code></td>
+                        <td><strong>{{ company.company_name }}</strong></td>
+                        <td>{{ company.industry or '-' }}</td>
+                        <td><small>{{ company.hr_contact }}</small></td>
+                        <td>
+                            {% if company.website %}
+                                <a href="{{ company.website }}" target="_blank"><small>{{ company.website|truncate(25) }}</small></a>
+                            {% else %}
+                                <small class="text-muted">—</small>
+                            {% endif %}
+                        </td>
+                        <td><small>{{ user.email }}</small></td>
+                        <td>
+                            {% if company.approval_status == 'approved' %}
+                                <span class="badge bg-success">Approved</span>
+                            {% elif company.approval_status == 'rejected' %}
+                                <span class="badge bg-danger">Rejected</span>
+                            {% else %}
+                                <span class="badge bg-warning">Pending</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if user.is_active %}
+                                <span class="badge bg-success">Active</span>
+                            {% else %}
+                                <span class="badge bg-danger">Blacklisted</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="d-flex gap-1">
+                                <a href="{{ url_for('admin.edit_company', company_id=company.id) }}" class="btn btn-sm btn-outline-primary" title="Edit"><i class="bi bi-pencil"></i></a>
+                                {% if company.approval_status == 'pending' %}
+                                    <a href="{{ url_for('admin.approve_company', company_id=company.id, action='approve') }}" class="btn btn-sm btn-success" title="Approve"><i class="bi bi-check-lg"></i></a>
+                                    <a href="{{ url_for('admin.approve_company', company_id=company.id, action='reject') }}" class="btn btn-sm btn-danger" title="Reject"><i class="bi bi-x-lg"></i></a>
+                                {% endif %}
+                                {% if user.is_active %}
+                                    <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#toggleModal{{ user.id }}" title="Blacklist"><i class="bi bi-slash-circle"></i></button>
+                                {% else %}
+                                    <button type="button" class="btn btn-sm btn-outline-success" data-bs-toggle="modal" data-bs-target="#toggleModal{{ user.id }}" title="Reactivate"><i class="bi bi-check-circle"></i></button>
+                                {% endif %}
+                                <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal{{ user.id }}" title="Delete"><i class="bi bi-trash"></i></button>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <!-- Toggle Modal -->
+                    <div class="modal fade" id="toggleModal{{ user.id }}" tabindex="-1">
+                      <div class="modal-dialog">
+                        <div class="modal-content">
+                          <div class="modal-header">
+                            <h5 class="modal-title">Confirm Action</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                          </div>
+                          <div class="modal-body">
+                            Are you sure you want to {% if user.is_active %}blacklist{% else %}reactivate{% endif %} <strong>{{ company.company_name }}</strong>?
+                          </div>
+                          <div class="modal-footer">
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <a href="{{ url_for('admin.toggle_active', user_id=user.id) }}" class="btn {% if user.is_active %}btn-danger{% else %}btn-success{% endif %}">
+                                {% if user.is_active %}Blacklist{% else %}Reactivate{% endif %}
+                            </a>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <!-- Delete Modal -->
+                    <div class="modal fade" id="deleteModal{{ user.id }}" tabindex="-1">
+                      <div class="modal-dialog">
+                        <div class="modal-content">
+                          <div class="modal-header">
+                            <h5 class="modal-title" style="color: var(--accent-red);">⚠️ Delete Company</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                          </div>
+                          <div class="modal-body">
+                            This will permanently delete <strong>{{ company.company_name }}</strong>, all drives, and all applications. This cannot be undone!
+                          </div>
+                          <div class="modal-footer">
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <form action="{{ url_for('admin.delete_user', user_id=user.id) }}" method="POST" style="display:inline;">
+                                <button type="submit" class="btn btn-danger"><i class="bi bi-trash me-1"></i>Delete Permanently</button>
+                            </form>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    {% endfor %}
+                </tbody>
+            </table>
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <i class="bi bi-building-x d-block"></i>
+                <p>No companies found</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
